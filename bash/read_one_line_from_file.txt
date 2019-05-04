@@ -1,0 +1,22 @@
+
+
+
+
+
+
+
+while read LINE ; do
+let COUNTER=COUNTER+1
+echo -e "\n Deleting file ${COUNTER} \n"
+sudo rm -f $LINE
+done < file1
+
+
+
+
+
+N=0
+ps afx | awk '{ printf $1; printf "\n" }' | while read LINE ; do
+N=$((N+1))
+echo "Line $N = $LINE"
+done
