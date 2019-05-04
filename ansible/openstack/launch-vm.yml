@@ -1,0 +1,38 @@
+# source rc file for Openstack auth
+
+- name: Create Openstack instance
+  hosts: "localhost"
+  gather_facts: false
+#  user: root
+  connection: local
+  become: yes
+  become_user: root
+  vars:
+    pb_os_username: "{{ lookup('env', 'OS_USERNAME') }}"
+    pb_os_password: "{{ lookup('env', 'OS_PASSWORD') }}"
+    pb_os_tenant_name: "{{ lookup('env', 'OS_TENANT_NAME') }}"
+    pb_os_auth_url: "{{ lookup('env', 'OS_AUTH_URL') }}"
+
+  tasks:
+    - name: debug-task
+      debug: msg="OS_USER {{ pb_os_username }} OS_PASS {{ pb_os_password }} OS_URL {{ pb_os_auth_url }} OS_TENANT {{ pb_os_tenant_name }}"
+    - name: launch an instance
+      os_server:
+       state: present
+       auth:
+         auth_url: "{{ pb_os_auth_url }}"
+         username: "{{ pb_os_username }}"
+         password: "{{ pb_os_password }}"
+         project_name: "{{ pb_os_tenant_name }}"
+       name: rc-test
+       image: 736f014f-8907-4e1e-9e02-cd4b04c4adb2
+       boot_from_volume: True
+       key_name: rc-keypair1
+       network: 1bacbdcc-a580-456d-bf8b-7937e63579b0
+       security_groups: a8597ee7-3071-4a4f-9598-3439746f438e
+#       userdata: "{{ lookup('file', 'cloudinit.yml') }}"
+       timeout: 200
+       flavor: 4
+       meta:
+        hostname: rc-test
+        group: ansible_group1

@@ -1,0 +1,192 @@
+#cloud-config
+#See here for usage and options:
+#   https://www.digitalocean.com/community/tutorials/an-introduction-to-cloud-config-scripting
+#   https://cloudinit.readthedocs.org/en/latest/topics/examples.html
+#   https://coreos.com/os/docs/latest/cloud-config.html
+#   https://dberzano.github.io/cloud/centos/
+#   /usr/share/doc/cloud-init/examples/cloud-config.txt
+
+###
+#Override the default in /etc/cloud/cloud.conf and allow password auth.
+###
+ssh_pwauth: True
+
+###
+#Drop the following files. If puppet later takes up ownership, great:
+#   /etc/ssh/sshd_config
+#   /etc/sysconfig/network-scripts/ifcfg-eth0
+#   /etc/yum.conf
+#   /etc/pki/rpm-gpg/RPM-GPG-KEY-puppetlabs
+#
+#In order to solve a chicken/egg problem with installing puppet we synthesize the addition
+# of the puppet labs repository here. The GPG key for their repository is dropped by this
+# script to /etc/pki/rpm-gpg/RPM-GPG-KEY-puppetlabs.
+###
+write_files:
+-   content: |
+        Protocol 2
+        SyslogFacility AUTHPRIV
+        PasswordAuthentication yes
+        ChallengeResponseAuthentication no
+        GSSAPIAuthentication yes
+        GSSAPICleanupCredentials yes
+        UsePAM yes
+        AcceptEnv LANG LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY LC_MESSAGES
+        AcceptEnv LC_PAPER LC_NAME LC_ADDRESS LC_TELEPHONE LC_MEASUREMENT
+        AcceptEnv LC_IDENTIFICATION LC_ALL LANGUAGE
+        AcceptEnv XMODIFIERS
+        X11Forwarding yes
+        Subsystem sftp    /usr/libexec/openssh/sftp-server
+        UseDNS no
+    path: /etc/ssh/sshd_config
+    owner: root:root
+    permissions: '0644'
+-   content: |
+        http_proxy="http://proxy.glb.comp1dept1.int:3128/"
+        https_proxy="http://proxy.glb.comp1dept1.int:3128/"
+        ftp_proxy="http://proxy.glb.comp1dept1.int:3128/"
+        no_proxy="localhost,127.0.0.1,localaddress,.localdomain.com,.comp1dept1.int"
+        HTTP_PROXY="http://proxy.glb.comp1dept1.int:3128/"
+        HTTPS_PROXY="http://proxy.glb.comp1dept1.int:3128/"
+        FTP_PROXY="http://proxy.glb.comp1dept1.int:3128/"
+        NO_PROXY="localhost,127.0.0.1,localaddress,.localdomain.com,.comp1dept1.int"
+    path: /etc/environment
+    owner: root:root
+    permissions: '0644'
+-   content: |
+        [main]
+        cachedir=/var/cache/yum/$basearch/$releasever
+        keepcache=0
+        debuglevel=2
+        logfile=/var/log/yum.log
+        exactarch=1
+        obsoletes=1
+        gpgcheck=1
+        plugins=1
+        installonly_limit=5
+        bugtracker_url=http://bugs.centos.org/set_project.php?project_id=19&ref=http://bugs.centos.org/bug_report_page.php?category=yum
+        distroverpkg=centos-release
+        proxy=http://proxy.glb.comp1dept1.int:3128
+    path: /etc/yum.conf
+    owner: root:root
+    permissions: '0644'
+-   content: |
+        search comp1dept1.int. vda.comp1dept1.int. wrd.comp1dept1.int.
+        nameserver 172.18.1.51
+        nameserver 172.21.1.53
+    path: /etc/resolv.conf
+    owner: root:root
+    permissions: '0644'
+-   content: |
+        -----BEGIN PGP PUBLIC KEY BLOCK-----
+        Version: GnuPG/MacGPG2 v2.0.17 (Darwin)
+
+        mQINBEw3u0ABEAC1+aJQpU59fwZ4mxFjqNCgfZgDhONDSYQFMRnYC1dzBpJHzI6b
+        fUBQeaZ8rh6N4kZ+wq1eL86YDXkCt4sCvNTP0eF2XaOLbmxtV9bdpTIBep9bQiKg
+        5iZaz+brUZlFk/MyJ0Yz//VQ68N1uvXccmD6uxQsVO+gx7rnarg/BGuCNaVtGwy+
+        S98g8Begwxs9JmGa8pMCcSxtC7fAfAEZ02cYyrw5KfBvFI3cHDdBqrEJQKwKeLKY
+        GHK3+H1TM4ZMxPsLuR/XKCbvTyl+OCPxU2OxPjufAxLlr8BWUzgJv6ztPe9imqpH
+        Ppp3KuLFNorjPqWY5jSgKl94W/CO2x591e++a1PhwUn7iVUwVVe+mOEWnK5+Fd0v
+        VMQebYCXS+3dNf6gxSvhz8etpw20T9Ytg4EdhLvCJRV/pYlqhcq+E9le1jFOHOc0
+        Nc5FQweUtHGaNVyn8S1hvnvWJBMxpXq+Bezfk3X8PhPT/l9O2lLFOOO08jo0OYiI
+        wrjhMQQOOSZOb3vBRvBZNnnxPrcdjUUm/9cVB8VcgI5KFhG7hmMCwH70tpUWcZCN
+        NlI1wj/PJ7Tlxjy44f1o4CQ5FxuozkiITJvh9CTg+k3wEmiaGz65w9jRl9ny2gEl
+        f4CR5+ba+w2dpuDeMwiHJIs5JsGyJjmA5/0xytB7QvgMs2q25vWhygsmUQARAQAB
+        tEdQdXBwZXQgTGFicyBSZWxlYXNlIEtleSAoUHVwcGV0IExhYnMgUmVsZWFzZSBL
+        ZXkpIDxpbmZvQHB1cHBldGxhYnMuY29tPokCPgQTAQIAKAIbAwYLCQgHAwIGFQgC
+        CQoLBBYCAwECHgECF4AFAk/x5PoFCQtIMjoACgkQEFS3okvW7DAIKQ/9HvZyf+LH
+        VSkCk92Kb6gckniin3+5ooz67hSr8miGBfK4eocqQ0H7bdtWjAILzR/IBY0xj6OH
+        KhYP2k8TLc7QhQjt0dRpNkX+Iton2AZryV7vUADreYz44B0bPmhiE+LL46ET5ITh
+        LKu/KfihzkEEBa9/t178+dO9zCM2xsXaiDhMOxVE32gXvSZKP3hmvnK/FdylUY3n
+        WtPedr+lHpBLoHGaPH7cjI+MEEugU3oAJ0jpq3V8n4w0jIq2V77wfmbD9byIV7dX
+        cxApzciK+ekwpQNQMSaceuxLlTZKcdSqo0/qmS2A863YZQ0ZBe+Xyf5OI33+y+Mr
+        y+vl6Lre2VfPm3udgR10E4tWXJ9Q2CmG+zNPWt73U1FD7xBI7PPvOlyzCX4QJhy2
+        Fn/fvzaNjHp4/FSiCw0HvX01epcersyun3xxPkRIjwwRM9m5MJ0o4hhPfa97zibX
+        Sh8XXBnosBQxeg6nEnb26eorVQbqGx0ruu/W2m5/JpUfREsFmNOBUbi8xlKNS5CZ
+        ypH3Zh88EZiTFolOMEh+hT6s0l6znBAGGZ4m/Unacm5yDHmg7unCk4JyVopQ2KHM
+        oqG886elu+rm0ASkhyqBAk9sWKptMl3NHiYTRE/m9VAkugVIB2pi+8u84f+an4Hm
+        l4xlyijgYu05pqNvnLRyJDLd61hviLC8GYU=
+        =qHKb
+        -----END PGP PUBLIC KEY BLOCK-----
+    path: /etc/pki/rpm-gpg/RPM-GPG-KEY-puppetlabs
+    owner: root:root
+    permissions: '0644'
+
+###
+# Add the Puppetlabs repository to Yum so we can install the most recent version
+# of puppet. We do this using the 'yum_repos' cloud-init module.
+# The below will create the file /etc/yum.repos.d/puppetlabs.repo.
+# It has been synthesized here after installing the file
+#   http://yum.puppetlabs.com/el/6/products/x86_64/puppetlabs-release-6-11.noarch.rpm
+# to a test computer and dissecting the results. This allows us to bypass
+# complications about the order of cloud-init module execution, http proxies
+# and a host of other issues that trapped the initial boot process in a catch 22.
+###
+yum_repos:
+    puppetlabs-products:
+        name: Puppet Labs Products El 6 - $basearch
+        baseurl: http://yum.puppetlabs.com/el/6/products/$basearch
+        gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-puppetlabs
+        enabled: true
+        gpgcheck: true
+    puppetlabs-deps:
+        name: Puppet Labs Dependencies El 6 - $basearch
+        baseurl: http://yum.puppetlabs.com/el/6/dependencies/$basearch
+        gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-puppetlabs
+        enabled: true
+        gpgcheck: true
+    puppetlabs-devel:
+        name: Puppet Labs Devel El 6 - $basearch
+        baseurl: http://yum.puppetlabs.com/el/6/devel/$basearch
+        gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-puppetlabs
+        enabled: false
+        gpgcheck: true
+    puppetlabs-products-source:
+        name: Puppet Labs Products El 6 - $basearch - Source
+        baseurl: http://yum.puppetlabs.com/el/6/products/SRPMS
+        gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-puppetlabs
+        failovermethod: priority
+        enabled: false
+        gpgcheck: true
+    puppetlabs-deps-source:
+        name: Puppet Labs Source Dependencies El 6 - $basearch - Source
+        baseurl: http://yum.puppetlabs.com/el/6/dependencies/SRPMS
+        gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-puppetlabs
+        enabled: false
+        gpgcheck: true
+    puppetlabs-devel-source:
+        name: Puppet Labs Devel El 6 - $basearch - Source
+        baseurl: http://yum.puppetlabs.com/el/6/devel/SRPMS
+        gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-puppetlabs
+        enabled: false
+        gpgcheck: true
+###
+# Force Yum to update all installed packages on the VM to current.
+# Then install Puppet
+###
+package_update: true
+package_upgrade: true
+packages:
+    - puppet
+    - vim
+    - bind-utils
+    - nc
+    - telnet
+
+###
+# Configure the /etc/puppet/puppet.conf file to use the NHS puppet server.
+# Provide the Root CA from the bdept103fore01.wrd.comp1dept1.int Foreman Server.
+###
+puppet:
+   conf:
+     agent:
+            server: puppet.glb.comp1dept1.int
+###
+# Finally, fire off these commands to force puppet to request a certificate from Foreman,
+# set puppet to run at boot time, and reboot the server (sshd and network configs will be
+# reloaded at this reboot).
+###
+runcmd:
+    - puppet agent --test
+    - chkconfig puppet on
+    - shutdown -r now

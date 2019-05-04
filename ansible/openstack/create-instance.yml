@@ -1,0 +1,20 @@
+# source rc file for Openstack auth
+
+- name: Create Openstack instance
+  hosts: "localhost"
+  gather_facts: false
+  user: root
+
+  tasks:
+    - name: launch an instance
+      os_server:
+       state: present
+       name: rc-test
+       image: wrd-common-centos-6-7-x86_64-qcow2
+       boot_from_volume: True
+       key_name: rc-keypair1
+       network: wrd-common-app
+       security_groups: wrd-common-access
+       userdata: cloudinit.yml
+       timeout: 200
+       flavor: 4
