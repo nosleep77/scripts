@@ -1,23 +1,30 @@
 #!/bin/bash
 
-set -e
+set -euo pipefail
 
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 BLUE='\033[0;34m'
 PURPLE='\033[0;35m'
 NC='\033[0m'    
+      
+if [ $# -lt 4 ]
+  then
+    echo "Missing argument"
+    exit 1
+fi
 
 Env=$1
 Version=$2
 Grafana_URL=$3
-Token=$4           
-#
-# ./script.sh dev 0 glsa_2NuXsP9GIVbIiztGgvju9EnJLd6gctTg_6f2708af localhost
-#curl -s http://admin:yGrXQepEA-s-hg==@127.0.0.1:3000/api/searchh?dashboard_uid=d111e6dc08db1d3cd5e306b601de265f6a3944ab | jq -r ' .[] | select(.type == "dash-db") | .uid'
-#curl -s http://admin:yGrXQepEA-s-hg==@localhost:3000/api/dashboards/uid/c6090637d2f5c6b2c1527a0e3f66eaa29522ac44 | jq '.'
-#curl -s --location --request GET 'http://localhost:3000/api/search' --header "Authorization: Bearer $4" | jq -r ' .[] | select(.type == "dash-db") | .uid'
+Token=$4     
+exit_code=0
 
+#   ./script.sh <Env> <Version> <GrafanaURL> <Token>
+
+#GET /api/search?dashboard_uid=<uid>
+#GET /api/dashboards/uid/<ui>
+#curl -s --location --request GET 'http://localhost:3000/api/search' --header "Authorization: Bearer $4" | jq -r ' .[] | select(.type == "dash-db") | .uid'
 
 printf "\n"
 
@@ -68,19 +75,20 @@ do
     #grabbing the uid from the yaml file
     cr_uid=$(yq -o=json eval $i | jq '.spec' | jq -r '.json' |  jq -r '.uid')
     match_bool=0
-    for j in k8s_uid"${!k8s_uids_array[@]}"
-    do
+    for j in "${!k8s_uids_array[@]}"; do
         if [ "${k8s_uids_array[$j]}" == "$cr_uid" ] ; then  
-        # If the above condition is evaluated to tue that means we found an uid match
-        # The followong if is to check if there is a version match as well
+        # If the above condition is evaluated to true when an UID match is found
+        # The followong condition will check if there is a version match as well
             if [ "${k8s_ver_array[$j]}" == "$Version" ] ; then 
                 printf "${BLUE}\ndashboard with UID: $cr_uid and version: $Version in kubernetes - found\n${NC}"
                 match_bool=1   
             fi
         fi
     done
+
     if [ $match_bool -eq "0" ] ; then 
             printf "${RED}\ndashboard with UID: $cr_uid and version: $Version in kubernetes - Not found\n${NC}"
+            exit_code=1
     fi
 done
 #check grafana
@@ -89,6 +97,7 @@ printf "${PURPLE}\n\t\t******** Grafana API check ********\n${NC}"
 
 grafana_uids=$(curl -s --location --request GET "http://$Grafana_URL/api/search" --header "Authorization: Bearer $Token" | jq -r ' .[] | select(.type == "dash-db") | .uid')
 grafana_uid_array=($(echo "$grafana_uids" | tr ' ' '\n'))
+
 for i in "${new_array[@]}"
 do
    : 
@@ -104,7 +113,9 @@ do
     done
     if [ $match_bool -eq "0" ] ; then 
             printf "${RED}\n Dashboard with UID: $cr_uid and version: $Version in Grafana- not found ${NC}\n"
+            exit_code=1
    fi
 
 done
+exit $exit_code
 printf "\n"
