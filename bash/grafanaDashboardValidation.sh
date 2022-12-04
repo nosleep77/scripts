@@ -19,7 +19,6 @@ Version=$2
 Grafana_URL=$3
 Token=$4     
 exit_code=0
-
 #   ./script.sh <Env> <Version> <GrafanaURL> <Token>
 
 #GET /api/search?dashboard_uid=<uid>
@@ -53,7 +52,7 @@ done
 printf "\n"
 
 #Save the name of dashboards and version in an array
-k8s_crs_names=$(kubectl get grafanadashboards -n monitoring -o jsonpath="{.items[*].metadata.name}")
+k8s_crs_names=$(kubectl get grafanadashboards -o jsonpath="{.items[*].metadata.name}")
 k8s_crs_names_array=($(echo "$k8s_crs_names" | tr ' ' '\n'))
 
 k8s_uids_array=()
@@ -62,8 +61,8 @@ k8s_ver_array=()
 for i in "${k8s_crs_names_array[@]}"
 do
     :
-    k8s_uids_array+=($(kubectl get grafanadashboard  $i -n monitoring  -o json | jq -r '.spec.json' | jq -r '.uid'))
-    k8s_ver_array+=($(kubectl get grafanadashboard  $i -n monitoring  -o json | jq -r '.metadata.labels.version'))
+    k8s_uids_array+=($(kubectl get grafanadashboard  $i -o json | jq -r '.spec.json' | jq -r '.uid'))
+    k8s_ver_array+=($(kubectl get grafanadashboard  $i -o json | jq -r '.metadata.labels.version'))
 done
 
 #Checking k8s
