@@ -65,8 +65,9 @@ do
     k8s_ver_array+=($(kubectl get grafanadashboard  $i -o json | jq -r '.metadata.labels.version'))
 done
 
-#Checking k8s
-printf "${PURPLE}\t\t******** kubernetes CR check ********\n${NC}"
+## check kubernetes
+####################
+printf "${PURPLE}\t\t******** check kubernetes for version and uid ********\n${NC}"
 
 for i in "${new_array[@]}"
 do
@@ -90,9 +91,11 @@ do
             exit_code=1
     fi
 done
-#check grafana
 
-printf "${PURPLE}\n\t\t******** Grafana API check ********\n${NC}"
+
+## check grafana api
+####################
+printf "${PURPLE}\n\t\t******** check grafana API for uid ********\n${NC}"
 
 grafana_uids=$(curl -s --location --request GET "http://$Grafana_URL/api/search" --header "Authorization: Bearer $Token" | jq -r ' .[] | select(.type == "dash-db") | .uid')
 grafana_uid_array=($(echo "$grafana_uids" | tr ' ' '\n'))
