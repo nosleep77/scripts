@@ -88,7 +88,7 @@ readarray -t k8s_uids_array < <( echo $kubectl_json_output  | jq -r '.items[].sp
 #done
 
 #Checking k8s
-grafana_uids=$(curl -s --location --request GET "http://$Grafana_URL/api/search" --header "Authorization: Bearer $Token" | jq -r ' .[] | select(.type == "dash-db") | .uid')
+grafana_uids=$(curl -s --location --request GET "https://$Grafana_URL/api/search" --header "Authorization: Bearer $Token" | jq -r ' .[] | select(.type == "dash-db") | .uid')
 grafana_uid_array=($(echo "$grafana_uids" | tr ' ' '\n'))
 
 printf "${PURPLE}\t\t******** kubernetes CR check ********\n${NC}"
