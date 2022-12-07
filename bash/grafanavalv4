@@ -1,3 +1,6 @@
+
+## grafana_uids=$(curl -s --location --request GET "https://$username:$password@$Grafana_URL/api/search" | jq -r ' .[] | select(.type == "dash-db") | .uid')
+
 #!/bin/bash
 
 set -euo pipefail
