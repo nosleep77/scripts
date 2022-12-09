@@ -27,7 +27,7 @@ String FetchSecret(String secretName,String vaultName) {
       echo 'set current subcription to source subscription'
       az account set --subscription $SUBS_ID
       """ 
-      def secret = sh script:'az keyvault secret show --name "api" --vault-name "jenkins-keyvault-azure" --query value -o tsv', returnStdout: true
+      def secret = sh script:"az keyvault secret show --name ${secretName} --vault-name ${vaultName} --query value -o tsv", returnStdout: true
       println "Azure keyvault secret: ${secret}"
       env.secret = secret //exporting to secret as env var
       }
