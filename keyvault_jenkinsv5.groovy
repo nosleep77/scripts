@@ -3,6 +3,7 @@ pipeline {
     stage('Run Script') {
       steps {
           script {
+            // env.secret=FetchSecret(String secretName,String vaultName)
             env.secret=FetchSecret("api","jenkins-keyvault-azure")
             sh 'curl -s -o script.sh https://raw.githubusercontent.com/Ryder05/AwsomeProject/main/script.sh && chmod u+x script.sh '
             sh """ ./script.sh ${env.secret} """ }
