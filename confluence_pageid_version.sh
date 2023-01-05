@@ -110,3 +110,44 @@ JSON='{"id":"'$CONTENT_ID'","type":"page","title":"Page Title","space":{"key":"S
 curl -u "$USERNAME:$PASSWORD" -X PUT -H "Content-Type: application/json" -d "$JSON" "$CONFLUENCE_URL/rest/api/content/$CONTENT_ID"
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#!/bin/bash
+
+# Set the base URL for the Confluence REST API
+CONFLUENCE_API_BASE_URL='https://your-confluence-instance.com/rest/api'
+
+# Set your Confluence credentials
+USERNAME='your-username'
+PASSWORD='your-password'
+
+# Set the ID of the page you want to update
+PAGE_ID='12345'
+
+# Set the path to the text file
+TEXT_FILE_PATH='/path/to/your/text/file.txt'
+
+# Read the contents of the text file into a variable
+PAGE_CONTENTS=$(<"$TEXT_FILE_PATH")
+
+# Escape special characters in the text file contents
+PAGE_CONTENTS=$(echo "$PAGE_CONTENTS" | sed 's/\n/\\n/g' | sed 's/\t/\\t/g' | sed 's/"/\\"/g')
+
+# Use curl to send a PUT request to the Confluence REST API to update the page
+curl -u "$USERNAME:$PASSWORD" -X PUT -H 'Content-Type: application/json' -d "{\"id\":\"$PAGE_ID\",\"type\":\"page\",\"title\":\"My Page\",\"body\":{\"storage\":{\"value\":\"$PAGE_CONTENTS\",\"representation\":\"storage\"}}}" "$CONFLUENCE_API_BASE_URL/content/$PAGE_ID"
