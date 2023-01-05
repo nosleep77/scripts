@@ -14,3 +14,7 @@ page_version=$(echo "$page_html" | grep -oP '(?<=data-version=")[^"]*')
 # Print the page ID and version
 echo "Page ID: $page_id"
 echo "Page version: $page_version"
+
+
+
+curl -u username:password -X POST -H "Content-Type: text/html" --data-binary @file.html "https://your-confluence-site.com/rest/api/content/"
