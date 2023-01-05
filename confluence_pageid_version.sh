@@ -53,3 +53,37 @@ JSON='{"id":"'$PAGE_ID'","type":"page","title":"Page Title","space":{"key":"SPAC
 curl -u "$USERNAME:$PASSWORD" -X PUT -H "Content-Type: application/json" -d "$JSON" "$CONFLUENCE_URL/rest/api/content/$PAGE_ID"
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#!/bin/bash
+
+# Set the login credentials and page ID
+USERNAME='username'
+PASSWORD='password'
+PAGE_ID='page-id'
+
+# Set the URL of the Confluence site
+CONFLUENCE_URL='https://your-confluence-site.com/'
+
+# Read the HTML file into a variable
+HTML=$(<file.html)
+
+# Set the JSON payload for the update request
+JSON='{"id":"'$PAGE_ID'","type":"page","title":"Page Title","space":{"key":"SPACEKEY"},"body":{"storage":{"value":"'$HTML'","representation":"storage"}}}'
+
+# Send the update request to the Confluence REST API
+curl -u "$USERNAME:$PASSWORD" -X PUT -H "Content-Type: application/json" -d "$JSON" "$CONFLUENCE_URL/rest/api/content/$PAGE_ID"
+
