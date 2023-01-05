@@ -85,5 +85,28 @@ HTML=$(<file.html)
 JSON='{"id":"'$PAGE_ID'","type":"page","title":"Page Title","space":{"key":"SPACEKEY"},"body":{"storage":{"value":"'$HTML'","representation":"storage"}}}'
 
 # Send the update request to the Confluence REST API
-curl -u "$USERNAME:$PASSWORD" -X PUT -H "Content-Type: application/json" -d "$JSON" "$CONFLUENCE_URL/rest/api/content/$PAGE_ID"
+RESPONSE=$(curl -u "$USERNAME:$PASSWORD" -X PUT -H "Content-Type: application/json" -d "$JSON" "$CONFLUENCE_URL/rest/api/content/$PAGE_ID")
+
+# Check the response for errors
+ERROR=$(echo "$RESPONSE" | jq -r .status.message)
+if [ "$ERROR" != "null" ]; then
+  echo "Error: $ERROR"
+  exit 1
+fi
+
+# Parse the response to get the new content ID
+CONTENT_ID=$(echo "$RESPONSE" | jq -r .id)
+
+# Get the updated content from Confluence
+UPDATED_CONTENT=$(curl -u "$USERNAME:$PASSWORD" "$CONFLUENCE_URL/rest/api/content/$CONTENT_ID?expand=body.storage")
+
+# Decode the HTML content
+DECODED_HTML=$(echo "$UPDATED_CONTENT" | jq -r .body.storage.value | sed 's/%/\\x/g')
+
+# Set the JSON payload for the update request
+JSON='{"id":"'$CONTENT_ID'","type":"page","title":"Page Title","space":{"key":"SPACEKEY"},"body":{"storage":{"value":"'$DECODED_HTML'","representation":"storage"}}}'
+
+# Send the update request to the Confluence REST API
+curl -u "$USERNAME:$PASSWORD" -X PUT -H "Content-Type: application/json" -d "$JSON" "$CONFLUENCE_URL/rest/api/content/$CONTENT_ID"
+
 
