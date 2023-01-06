@@ -151,3 +151,23 @@ PAGE_CONTENTS=$(echo "$PAGE_CONTENTS" | sed 's/\n/\\n/g' | sed 's/\t/\\t/g' | se
 
 # Use curl to send a PUT request to the Confluence REST API to update the page
 curl -u "$USERNAME:$PASSWORD" -X PUT -H 'Content-Type: application/json' -d "{\"id\":\"$PAGE_ID\",\"type\":\"page\",\"title\":\"My Page\",\"body\":{\"storage\":{\"value\":\"$PAGE_CONTENTS\",\"representation\":\"storage\"}}}" "$CONFLUENCE_API_BASE_URL/content/$PAGE_ID"
+
+
+
+
+
+
+
+
+
+
+
+
+
+JSON='{"id":"'$PAGE_ID'","type":"page","title":"Page Title","space":{"key":"SPACEKEY"},"body":{"storage":{"value":"'$(echo $OUTPUT_FILE | sed 's/$/\\n/g' | tr -d '\n')'","representation":"storage"}}}'
+
+
+
+
+
+
