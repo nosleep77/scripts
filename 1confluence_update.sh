@@ -46,3 +46,4 @@ generate_put_data()
 }
 EOF
 }
+curl -i -u "$Username:$Password" -X PUT -H "Content-Type: application/json"  -H "Accept: application/json"  --data "$(generate_put_data)" "https://$Confluence_URL/wiki/rest/api/content/$Page_ID"
