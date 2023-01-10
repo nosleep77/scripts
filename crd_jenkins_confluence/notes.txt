@@ -1,0 +1,25 @@
+
+
+
+
+
+
+JSON='{"id":"'$PAGE_ID'","type":"page","title":"Page Title","space":{"key":"SPACEKEY"},"body":{"storage":{"value":"'$(echo $OUTPUT_FILE | sed 's/$/\\n/g' | tr -d '\n')'","representation":"storage"}}}'
+
+
+HTML=${HTML//\\/\\\\} # \ 
+HTML=${HTML//\//\\\/} # / 
+HTML=${HTML//\'/\\\'} # ' (not strictly needed ?)
+HTML=${HTML//\"/\\\"} # " 
+HTML=${HTML//   /\\t} # \t (tab)
+HTML=${HTML//
+/\\\n} # \n (newline)
+HTML=${HTML//^M/\\\r} # \r (carriage return)
+HTML=${HTML//^L/\\\f} # \f (form feed)
+HTML=${HTML//^H/\\\b} # \b (backspace)
+
+
+
+echo "'"'[]`~!@#$%^&*()-_=+{}\|;:",<.>/?' | sed 's/[][`~!@#$%^&*()-_=+{}\|;:",<.>/?'"'"']/\\&/g'
+
+
