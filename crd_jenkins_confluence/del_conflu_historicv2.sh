@@ -19,3 +19,9 @@ if [ $VERSION_COUNT -gt 3 ]; then
     curl -u username:password -X DELETE "https://your-confluence-url/rest/api/content/$PAGE_ID/version/$VERSION_ID"
   done
 fi
+
+
+
+curl -s -u username:password -X GET "https://your-confluence-url/rest/api/content/$PAGE_ID/version" | jq .
+
+VERSION_IDS=$(curl -s -u username:password -X GET "https://your-confluence-url/rest/api/content/$PAGE_ID/version" | jq -r '.results[:'"$VERSIONS_TO_DELETE"'].PROPERTY_NAME_YOU_FOUND')
