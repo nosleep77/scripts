@@ -1,3 +1,6 @@
+## https://awesome-prometheus-alerts.grep.to/rules#postgresql
+## https://grafana.com/oss/prometheus/exporters/postgres-exporter/?tab=alerting-rules
+
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
