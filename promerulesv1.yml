@@ -1,0 +1,90 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: k8s-psql
+  name: prometheus-psql-azure-rules
+spec:
+groups:
+- name: PostgresExporter
+  rules:
+    - alert: PostgresqlHighBackupStorage
+      expr: 'backup_storage_used > 10000'
+      for: 0m
+      labels:
+        severity: high
+      annotations:
+        summary: Postgresql High backup storage (instance {{ $labels.instance }})
+        description: "	Amount of backup storage used is exceeding \n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: PostgresqlHighMemoryUsage
+      expr: '(memory_percent > 80)'
+      for: 0m
+      labels:
+        severity: critical
+      annotations:
+        summary: Postgresql High Memory usage rate (instance {{ $labels.instance }})
+        description: "PostgreSQL has hgih Memory usage\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: PostgresqlHighCpuUsage
+      expr: '(cpu_percent > 80'
+      for: 0m
+      labels:
+        severity: critical
+      annotations:
+        summary: Postgresql High CPU USAGE rate (instance {{ $labels.instance }})
+        description: "PostgreSQL has hgih cpu usage\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: PostgresqlHighCpuUsage
+      expr: '(storage_free > 1500'
+      for: 0m
+      labels:
+        severity: critical
+      annotations:
+        summary: Postgresql Free storage space very low (instance {{ $labels.instance }})
+        description: "The amount of storage space available is very low \n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: PostgresqlTooManyConnections
+      expr: 'sum by (datname) (active_connections{datname!~"template.*|postgres"}) > 150'
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: Postgresql too many connections (instance {{ $labels.instance }})
+        description: "PostgreSQL instance has too many connections (> 80%).\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: PostgresqlLowSucceededConnections
+      expr: 'sum by (datname) (connections_succeeded{datname!~"template.*|postgres"}) > 50'
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: Postgresql low succeeded connections rate (instance {{ $labels.instance }})
+        description: "PostgreSQL instance has too many connections (> 80%).\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: PostgresqlTooManyFailedConnections
+      expr: 'sum by (datname) (connections_failed{datname!~"template.*|postgres"}) > 20'
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: Postgresql too many failed connections (instance {{ $labels.instance }})
+        description: "PostgreSQL instance has too many failed connections (> 80%).\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: PostgresqlNetworkOut
+      expr: 'network_bytes_egress > 10000'
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: Postgresql network out (instance {{ $labels.instance }})
+        description: "Amount of outgoing network traffic (> 10000)\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: PostgresqlNetworkIN
+      expr: 'network_bytes_ingress > 10000'
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: Postgresql network in (instance {{ $labels.instance }})
+        description: "Amount of incoming network traffic. (> 10000)\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
