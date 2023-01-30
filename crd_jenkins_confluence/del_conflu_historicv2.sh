@@ -22,6 +22,7 @@ fi
 
 
 
+## these are notes - not part of script
 curl -s -u username:password -X GET "https://your-confluence-url/rest/api/content/$PAGE_ID/version" | jq .
 
 VERSION_IDS=$(curl -s -u username:password -X GET "https://your-confluence-url/rest/api/content/$PAGE_ID/version" | jq -r '.results[:'"$VERSIONS_TO_DELETE"'].PROPERTY_NAME_YOU_FOUND')
